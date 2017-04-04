@@ -1,7 +1,26 @@
-import React, { Component } from 'react';
-import { gql, graphql } from 'react-apollo';
+import React from 'react';
+import { gql, graphql, withApollo } from 'react-apollo';
+import ApolloClient from 'apollo-client';
 
-class App extends Component {
+const App = React.createClass({
+
+  incrementPostLikesQuery(idVal, updateVal) {
+    this.props.client.mutate({
+      query: gql`
+        mutation updatenames ($id: ID!, $name: String) {
+          updatePeople (id: $id, name: $name) {
+            id
+            name
+          }
+        }
+      `,
+      variables: {
+        "id": idVal,
+        "name": updateVal
+       },
+    });
+  },
+
   render() {
     const { data: { loading, people } } = this.props;
     return (
@@ -31,10 +50,18 @@ class App extends Component {
             ))}
           </ul>
         )}
+        <div>
+          <button onClick={this.incrementPostLikesQuery.bind(null, 1, "Tiny Tim")}>Update Names</button>
+        </div>
       </main>
     );
   }
+})
+
+App.propTypes = {
+  client: React.PropTypes.instanceOf(ApolloClient).isRequired,
 }
+const AppWithApollo = withApollo(App);
 
 export default graphql(
   gql`{
@@ -43,4 +70,4 @@ export default graphql(
       name
     }
   }`,
-)(App)
+)(AppWithApollo)
